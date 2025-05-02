@@ -26,6 +26,9 @@ var _ v3.S3SDKClient = &S3SDKClientMock{}
 //			CreateMultipartUploadFunc: func(ctx context.Context, in *s3.CreateMultipartUploadInput, optFns ...func(*s3.Options)) (*s3.CreateMultipartUploadOutput, error) {
 //				panic("mock out the CreateMultipartUpload method")
 //			},
+//			DeleteObjectFunc: func(ctx context.Context, in *s3.DeleteObjectInput, optFns ...func(*s3.Options)) (*s3.DeleteObjectOutput, error) {
+//				panic("mock out the DeleteObject method")
+//			},
 //			GetBucketPolicyFunc: func(ctx context.Context, in *s3.GetBucketPolicyInput, optFns ...func(*s3.Options)) (*s3.GetBucketPolicyOutput, error) {
 //				panic("mock out the GetBucketPolicy method")
 //			},
@@ -65,6 +68,9 @@ type S3SDKClientMock struct {
 
 	// CreateMultipartUploadFunc mocks the CreateMultipartUpload method.
 	CreateMultipartUploadFunc func(ctx context.Context, in *s3.CreateMultipartUploadInput, optFns ...func(*s3.Options)) (*s3.CreateMultipartUploadOutput, error)
+
+	// DeleteObjectFunc mocks the DeleteObject method.
+	DeleteObjectFunc func(ctx context.Context, in *s3.DeleteObjectInput, optFns ...func(*s3.Options)) (*s3.DeleteObjectOutput, error)
 
 	// GetBucketPolicyFunc mocks the GetBucketPolicy method.
 	GetBucketPolicyFunc func(ctx context.Context, in *s3.GetBucketPolicyInput, optFns ...func(*s3.Options)) (*s3.GetBucketPolicyOutput, error)
@@ -110,6 +116,15 @@ type S3SDKClientMock struct {
 			Ctx context.Context
 			// In is the in argument value.
 			In *s3.CreateMultipartUploadInput
+			// OptFns is the optFns argument value.
+			OptFns []func(*s3.Options)
+		}
+		// DeleteObject holds details about calls to the DeleteObject method.
+		DeleteObject []struct {
+			// Ctx is the ctx argument value.
+			Ctx context.Context
+			// In is the in argument value.
+			In *s3.DeleteObjectInput
 			// OptFns is the optFns argument value.
 			OptFns []func(*s3.Options)
 		}
@@ -197,6 +212,7 @@ type S3SDKClientMock struct {
 	}
 	lockCompleteMultipartUpload sync.RWMutex
 	lockCreateMultipartUpload   sync.RWMutex
+	lockDeleteObject            sync.RWMutex
 	lockGetBucketPolicy         sync.RWMutex
 	lockGetObject               sync.RWMutex
 	lockHeadBucket              sync.RWMutex
@@ -285,6 +301,46 @@ func (mock *S3SDKClientMock) CreateMultipartUploadCalls() []struct {
 	mock.lockCreateMultipartUpload.RLock()
 	calls = mock.calls.CreateMultipartUpload
 	mock.lockCreateMultipartUpload.RUnlock()
+	return calls
+}
+
+// DeleteObject calls DeleteObjectFunc.
+func (mock *S3SDKClientMock) DeleteObject(ctx context.Context, in *s3.DeleteObjectInput, optFns ...func(*s3.Options)) (*s3.DeleteObjectOutput, error) {
+	if mock.DeleteObjectFunc == nil {
+		panic("S3SDKClientMock.DeleteObjectFunc: method is nil but S3SDKClient.DeleteObject was just called")
+	}
+	callInfo := struct {
+		Ctx    context.Context
+		In     *s3.DeleteObjectInput
+		OptFns []func(*s3.Options)
+	}{
+		Ctx:    ctx,
+		In:     in,
+		OptFns: optFns,
+	}
+	mock.lockDeleteObject.Lock()
+	mock.calls.DeleteObject = append(mock.calls.DeleteObject, callInfo)
+	mock.lockDeleteObject.Unlock()
+	return mock.DeleteObjectFunc(ctx, in, optFns...)
+}
+
+// DeleteObjectCalls gets all the calls that were made to DeleteObject.
+// Check the length with:
+//
+//	len(mockedS3SDKClient.DeleteObjectCalls())
+func (mock *S3SDKClientMock) DeleteObjectCalls() []struct {
+	Ctx    context.Context
+	In     *s3.DeleteObjectInput
+	OptFns []func(*s3.Options)
+} {
+	var calls []struct {
+		Ctx    context.Context
+		In     *s3.DeleteObjectInput
+		OptFns []func(*s3.Options)
+	}
+	mock.lockDeleteObject.RLock()
+	calls = mock.calls.DeleteObject
+	mock.lockDeleteObject.RUnlock()
 	return calls
 }
 

@@ -25,6 +25,7 @@ type S3SDKClient interface {
 	GetBucketPolicy(ctx context.Context, in *s3.GetBucketPolicyInput, optFns ...func(*s3.Options)) (*s3.GetBucketPolicyOutput, error)
 	PutBucketPolicy(ctx context.Context, in *s3.PutBucketPolicyInput, optFns ...func(*s3.Options)) (*s3.PutBucketPolicyOutput, error)
 	ListObjects(ctx context.Context, in *s3.ListObjectsInput, optFns ...func(*s3.Options)) (*s3.ListObjectsOutput, error)
+	DeleteObject(ctx context.Context, in *s3.DeleteObjectInput, optFns ...func(*s3.Options)) (*s3.DeleteObjectOutput, error)
 }
 
 // S3CryptoClient represents the cryptoclient with methods required to upload parts with encryption
