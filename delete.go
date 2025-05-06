@@ -7,6 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 )
 
+// Delete removes the object with the specified key from the S3 bucket.
 func (cli *Client) Delete(ctx context.Context, key string) error {
 	_, err := cli.sdkClient.DeleteObject(ctx, &s3.DeleteObjectInput{
 		Bucket: &cli.bucketName,
