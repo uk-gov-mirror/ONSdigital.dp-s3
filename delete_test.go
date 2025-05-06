@@ -2,6 +2,7 @@ package s3_test
 
 import (
 	"context"
+	"errors"
 	"testing"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -41,6 +42,33 @@ func TestDelete(t *testing.T) {
 					Bucket: &bucket,
 					Key:    &objKey,
 				})
+			})
+		})
+	})
+}
+
+func TestDeleteError(t *testing.T) {
+	Convey("Given an S3 client configured with a bucket and region", t, func() {
+		ctx := context.Background()
+
+		bucket := "myBucket"
+		objKey := "my/object/key"
+		region := "eu-north-1"
+
+		sdkMock := &mock.S3SDKClientMock{
+			DeleteObjectFunc: func(ctx context.Context, params *s3.DeleteObjectInput, optFns ...func(*s3.Options)) (*s3.DeleteObjectOutput, error) {
+				return nil, errors.New("delete error")
+			},
+		}
+
+		cli := dps3.InstantiateClient(sdkMock, nil, nil, nil, bucket, region, aws.Config{})
+
+		Convey("When Delete is called with a valid key", func() {
+			err := cli.Delete(ctx, objKey)
+
+			Convey("Then an error is returned", func() {
+				So(err, ShouldNotBeNil)
+				So(err.Error(), ShouldEqual, "error deleting object from s3: delete error")
 			})
 		})
 	})
